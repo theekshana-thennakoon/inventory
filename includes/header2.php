@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top">
     <div class="container-fluid">
         <a class="navbar-brand" href="./">
-            <img src="./assets/logowhite.png" alt="Logo" class="d-inline-block align-text-top ml-5" style="width: 25%;">
+            <img src="https://fotmediainventory.great-site.net/assets/logowhite.png" alt="Logo" class="d-inline-block align-text-top ml-5" style="width: 25%;">
         </a>
 
         <!-- Mobile menu toggle -->
