@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="./">
+        <a class="navbar-brand" href="https://fotmediainventory.great-site.net/">
             <img src="https://fotmediainventory.great-site.net/assets/logowhite.png" alt="Logo" class="d-inline-block align-text-top ml-5" style="width: 25%;">
         </a>
 
