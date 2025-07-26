@@ -228,8 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 </tr>
                                                 <tr>
                                                     <th>Serial No</th>
-                                                    <th>Item</th>
-                                                    <th>Available</th>
+                                                    <th>Item Name</th>
                                                     <th>Quantity to Issue</th>
                                                 </tr>
 
@@ -260,7 +259,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                     <tr>
                                                         <td><?php echo htmlspecialchars($item['serial_no']); ?></td>
                                                         <td><?php echo htmlspecialchars($item['name']); ?></td>
-                                                        <td><?php echo $item['quantity']; ?></td>
                                                         <td>
                                                             <input type="number"
                                                                 name="items[<?php echo $item['id']; ?>]"
