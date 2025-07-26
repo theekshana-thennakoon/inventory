@@ -17,7 +17,7 @@ $items = $pdo->query("
     SELECT id, name, quantity , serial_no 
     FROM items 
     WHERE quantity > 0 
-    ORDER BY name
+    ORDER BY serial_no
 ")->fetchAll(PDO::FETCH_ASSOC);
 
 $errors = [];
@@ -229,7 +229,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 <tr>
                                                     <th>Serial No</th>
                                                     <th>Item Name</th>
-                                                    <th>Quantity to Issue</th>
+                                                    <th>Action</th>
                                                 </tr>
 
                                                 <script>
@@ -260,25 +260,167 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                         <td><?php echo htmlspecialchars($item['serial_no']); ?></td>
                                                         <td><?php echo htmlspecialchars($item['name']); ?></td>
                                                         <td>
-                                                            <input type="number"
-                                                                name="items[<?php echo $item['id']; ?>]"
-                                                                class="form-control"
-                                                                min="0"
-                                                                max="<?php echo $item['quantity']; ?>"
-                                                                value="<?php echo $selectedItems[$item['id']] ?? 0; ?>">
+                                                            <?php
+                                                            // If item is already selected (from previous POST), hide the button
+                                                            $isSelected = isset($selectedItems[$item['id']]) && $selectedItems[$item['id']] > 0;
+                                                            ?>
+                                                            <?php if (!$isSelected): ?>
+                                                                <button type="button" class="btn btn-success btn-sm add-to-selected"
+                                                                    data-item-id="<?php echo $item['id']; ?>"
+                                                                    data-item-name="<?php echo htmlspecialchars($item['name']); ?>"
+                                                                    data-serial-no="<?php echo htmlspecialchars($item['serial_no']); ?>"
+                                                                    data-max-qty="<?php echo $item['quantity']; ?>">
+                                                                    <i class="bi bi-plus-circle"></i> Select
+                                                                </button>
+                                                            <?php endif; ?>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
                                         </table>
                                     </div>
+
+                                    <!-- Selected Items Table -->
+                                    <div class="table-responsive mb-3">
+                                        <h6>Selected Items</h6>
+                                        <table class="table table-bordered table-sm" id="selectedItemsTable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Serial No</th>
+                                                    <th>Item Name</th>
+                                                    <th>Quantity</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php if (!empty($selectedItems)): ?>
+                                                    <?php foreach ($selectedItems as $itemId => $qty): ?>
+                                                        <?php
+                                                        $item = array_filter($items, function ($i) use ($itemId) {
+                                                            return $i['id'] == $itemId;
+                                                        });
+                                                        $item = reset($item);
+                                                        ?>
+                                                        <?php if ($item): ?>
+                                                            <tr data-item-id="<?php echo $item['id']; ?>">
+                                                                <td><?php echo htmlspecialchars($item['serial_no']); ?></td>
+                                                                <td><?php echo htmlspecialchars($item['name']); ?></td>
+                                                                <td>
+                                                                    <input type="number" class="form-control form-control-sm selected-qty-input"
+                                                                        name="items[<?php echo $item['id']; ?>]"
+                                                                        value="<?php echo (int)$qty; ?>"
+                                                                        min="1"
+                                                                        max="<?php echo $item['quantity']; ?>">
+                                                                </td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-danger btn-sm remove-selected-item">
+                                                                        <i class="bi bi-x-circle"></i> Remove
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endif; ?>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <script>
+                                        // Store items data for JS use
+                                        const itemsData = <?php echo json_encode($items); ?>;
+                                        // Store selected items for JS use
+                                        let selectedItems = <?php echo json_encode($selectedItems); ?>;
+
+                                        function renderSelectedItemsTable() {
+                                            const tbody = document.querySelector('#selectedItemsTable tbody');
+                                            tbody.innerHTML = '';
+                                            Object.keys(selectedItems).forEach(itemId => {
+                                                const item = itemsData.find(i => i.id == itemId);
+                                                if (!item) return;
+                                                const qty = selectedItems[itemId];
+                                                const tr = document.createElement('tr');
+                                                tr.setAttribute('data-item-id', item.id);
+
+                                                tr.innerHTML = `
+                                                <td>${item.serial_no ? item.serial_no : ''}</td>
+                                                <td>${item.name}</td>
+                                                <td>
+                                                    <input type="number" class="form-control form-control-sm selected-qty-input"
+                                                        name="items[${item.id}]"
+                                                        value="${qty}"
+                                                        min="1"
+                                                        max="${item.quantity}">
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm remove-selected-item">
+                                                        <i class="bi bi-x-circle"></i> Remove
+                                                    </button>
+                                                </td>
+                                            `;
+                                                tbody.appendChild(tr);
+                                            });
+                                        }
+
+                                        // Add to selected items
+                                        document.querySelectorAll('.add-to-selected').forEach(btn => {
+                                            btn.addEventListener('click', function() {
+                                                const itemId = this.getAttribute('data-item-id');
+                                                const itemName = this.getAttribute('data-item-name');
+                                                const serialNo = this.getAttribute('data-serial-no');
+                                                const maxQty = this.getAttribute('data-max-qty');
+                                                if (!selectedItems[itemId]) {
+                                                    selectedItems[itemId] = 1;
+                                                    renderSelectedItemsTable();
+                                                    this.disabled = true;
+                                                    this.textContent = 'Selected';
+                                                }
+                                            });
+                                        });
+
+                                        // Delegate remove and quantity change events
+                                        document.addEventListener('click', function(e) {
+                                            if (e.target.closest('.remove-selected-item')) {
+                                                const tr = e.target.closest('tr');
+                                                const itemId = tr.getAttribute('data-item-id');
+                                                delete selectedItems[itemId];
+                                                renderSelectedItemsTable();
+                                                // Re-enable select button
+                                                const btn = document.querySelector(`.add-to-selected[data-item-id="${itemId}"]`);
+                                                if (btn) {
+                                                    btn.disabled = false;
+                                                    btn.innerHTML = '<i class="bi bi-plus-circle"></i> Select';
+                                                }
+                                            }
+                                        });
+
+                                        document.addEventListener('input', function(e) {
+                                            if (e.target.classList.contains('selected-qty-input')) {
+                                                const tr = e.target.closest('tr');
+                                                const itemId = tr.getAttribute('data-item-id');
+                                                let val = parseInt(e.target.value, 10);
+                                                const max = parseInt(e.target.getAttribute('max'), 10);
+                                                if (isNaN(val) || val < 1) val = 1;
+                                                if (val > max) val = max;
+                                                e.target.value = val;
+                                                selectedItems[itemId] = val;
+                                            }
+                                        });
+
+                                        // On page load, render selected items table
+                                        renderSelectedItemsTable();
+                                    </script>
+                                    </td>
+                                    </tr>
+                                    </tbody>
+                                    </table>
                                 </div>
                             </div>
-                        </form>
                     </div>
+                    </form>
                 </div>
-            </main>
         </div>
+        </main>
+    </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
