@@ -213,12 +213,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <div class="alert alert-danger"><?php echo $errors['items']; ?></div>
                                     <?php endif; ?>
 
-                                    <div class="table-responsive">
+                                    <div class="table-responsive mb-3">
                                         <table class="table table-sm">
                                             <thead class="table-light">
                                                 <tr>
                                                     <td colspan="1">
                                                         <input type="text" id="itemSearch" class="form-control" placeholder="Search by item name or Serial No...">
+                                                    </td>
+                                                    <td colspan="3" class="text-end">
+                                                        <button type="submit" name="issue_items" class="btn btn-primary">
+                                                            <i class="bi bi-check"></i> Issue Items
+                                                        </button>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -269,15 +274,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
-
-                                <div class="col-12 mt-4">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-check-circle"></i> Issue Items
-                                    </button>
-                                    <a href="../issuances/" class="btn btn-outline-secondary">
-                                        <i class="bi bi-x-circle"></i> Cancel
-                                    </a>
                                 </div>
                             </div>
                         </form>

@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
 
                                 <div class="col-12">
-                                    <div class="mb-3">
+                                    <div class=" mb-3">
                                         <label for="description" class="form-label">Description</label>
                                         <textarea class="form-control <?php echo isset($errors['description']) ? 'is-invalid' : ''; ?>"
                                             id="description" name="description" rows="3"><?php echo htmlspecialchars($description); ?></textarea>
@@ -140,8 +140,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <div class="mb-3">
+                                <div class="col-md-6" style="display: none;">
+                                    <div class=" mb-3">
                                         <label for="quantity" class="form-label">Quantity *</label>
                                         <input type="number" class="form-control <?php echo isset($errors['quantity']) ? 'is-invalid' : ''; ?>"
                                             id="quantity" name="quantity" value="1" min="0" readonly required>
@@ -151,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md-6" style="display: none;">
                                     <div class="mb-3">
                                         <label for="minimum_quantity" class="form-label">Minimum Quantity *</label>
                                         <input type="number" class="form-control <?php echo isset($errors['minimum_quantity']) ? 'is-invalid' : ''; ?>"
