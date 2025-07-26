@@ -206,7 +206,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <?php endif; ?>
                                     </div>
                                 </div>
-
+                                <div class="col-12">
+                                    <h5 class="mb-3">Selected Items</h5>
+                                    <div class="table-responsive mb-3">
+                                        <table class="table table-bordered table-sm" id="selectedItemsTable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Serial No</th>
+                                                    <th>Item Name</th>
+                                                    <th>Quantity</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php if (!empty($selectedItems)): ?>
+                                                    <?php foreach ($selectedItems as $itemId => $qty): ?>
+                                                        <?php
+                                                        $item = array_filter($items, function ($i) use ($itemId) {
+                                                            return $i['id'] == $itemId;
+                                                        });
+                                                        $item = reset($item);
+                                                        ?>
+                                                        <?php if ($item): ?>
+                                                            <tr data-item-id="<?php echo $item['id']; ?>">
+                                                                <td><?php echo htmlspecialchars($item['serial_no']); ?></td>
+                                                                <td><?php echo htmlspecialchars($item['name']); ?></td>
+                                                                <td>
+                                                                    <input type="number" class="form-control form-control-sm selected-qty-input"
+                                                                        name="items[<?php echo $item['id']; ?>]"
+                                                                        value="<?php echo (int)$qty; ?>"
+                                                                        min="1"
+                                                                        max="<?php echo $item['quantity']; ?>">
+                                                                </td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-danger btn-sm remove-selected-item">
+                                                                        <i class="bi bi-x-circle"></i> Remove
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endif; ?>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                                 <div class="col-12">
                                     <h5 class="mb-3">Items to Issue</h5>
                                     <?php if (isset($errors['items'])): ?>
@@ -281,49 +325,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
 
                                     <!-- Selected Items Table -->
-                                    <div class="table-responsive mb-3">
-                                        <h6>Selected Items</h6>
-                                        <table class="table table-bordered table-sm" id="selectedItemsTable">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Serial No</th>
-                                                    <th>Item Name</th>
-                                                    <th>Quantity</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php if (!empty($selectedItems)): ?>
-                                                    <?php foreach ($selectedItems as $itemId => $qty): ?>
-                                                        <?php
-                                                        $item = array_filter($items, function ($i) use ($itemId) {
-                                                            return $i['id'] == $itemId;
-                                                        });
-                                                        $item = reset($item);
-                                                        ?>
-                                                        <?php if ($item): ?>
-                                                            <tr data-item-id="<?php echo $item['id']; ?>">
-                                                                <td><?php echo htmlspecialchars($item['serial_no']); ?></td>
-                                                                <td><?php echo htmlspecialchars($item['name']); ?></td>
-                                                                <td>
-                                                                    <input type="number" class="form-control form-control-sm selected-qty-input"
-                                                                        name="items[<?php echo $item['id']; ?>]"
-                                                                        value="<?php echo (int)$qty; ?>"
-                                                                        min="1"
-                                                                        max="<?php echo $item['quantity']; ?>">
-                                                                </td>
-                                                                <td>
-                                                                    <button type="button" class="btn btn-danger btn-sm remove-selected-item">
-                                                                        <i class="bi bi-x-circle"></i> Remove
-                                                                    </button>
-                                                                </td>
-                                                            </tr>
-                                                        <?php endif; ?>
-                                                    <?php endforeach; ?>
-                                                <?php endif; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
+
 
                                     <script>
                                         // Store items data for JS use
