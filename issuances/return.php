@@ -22,7 +22,7 @@ if (!$stmt->fetch()) {
 // Get issued items that haven't been fully returned
 $items = $pdo->prepare("
     SELECT ii.id, ii.item_id, ii.quantity, ii.returned_quantity,
-           i.name as item_name, i.description as item_description
+           i.name as item_name, i.serial_no as item_serial_no, i.description as item_description
     FROM issuance_items ii
     JOIN items i ON ii.item_id = i.id
     WHERE ii.issuance_id = ? 
@@ -191,8 +191,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 <thead class="table-light">
                                                     <tr>
                                                         <th>Item</th>
+                                                        <th>Serial No</th>
                                                         <th>Issued Qty</th>
-                                                        <th>Already Returned</th>
                                                         <th>Return Qty *</th>
                                                         <th>Condition</th>
                                                     </tr>
@@ -206,14 +206,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                                     <br><small class="text-muted"><?php echo htmlspecialchars($item['item_description']); ?></small>
                                                                 <?php endif; ?>
                                                             </td>
+                                                            <td><?php echo $item['item_serial_no']; ?></td>
                                                             <td><?php echo $item['quantity']; ?></td>
-                                                            <td><?php echo $item['returned_quantity'] ?? '0'; ?></td>
                                                             <td>
-                                                                <input type="number"
-                                                                    name="return_quantity[<?php echo $item['id']; ?>]"
-                                                                    class="form-control"
-                                                                    max="<?php echo $item['quantity'] - ($item['returned_quantity'] ?? 0); ?>"
-                                                                    value="<?php echo $item['quantity'] - ($item['returned_quantity'] ?? 0); ?>">
+                                                                <button type="button" class="btn btn-outline-success btn-sm select-return-item"
+                                                                    data-item-id="<?php echo $item['id']; ?>"
+                                                                    data-item-name="<?php echo htmlspecialchars($item['item_name']); ?>"
+                                                                    data-item-desc="<?php echo htmlspecialchars($item['item_description']); ?>"
+                                                                    data-max="<?php echo $item['quantity'] - ($item['returned_quantity'] ?? 0); ?>"
+                                                                    id="select-btn-<?php echo $item['id']; ?>">
+                                                                    <i class="bi bi-plus-circle"></i> Select
+                                                                </button>
                                                             </td>
                                                             <td>
                                                                 <select class="form-select"
@@ -227,6 +230,111 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                     <?php endforeach; ?>
                                                 </tbody>
                                             </table>
+
+                                            <!-- Table for selected items to return -->
+                                            <div class="mt-4">
+                                                <h6>Selected Items for Return</h6>
+                                                <table class="table table-bordered table-sm" id="selected-items-table" style="display:none;">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Item</th>
+                                                            <th>Return Qty *</th>
+                                                            <th>Condition</th>
+                                                            <th>Remove</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!-- JS will populate rows here -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <script>
+                                                const itemsData = <?php echo json_encode($items); ?>;
+                                                const selectedItems = {};
+
+                                                document.querySelectorAll('.select-return-item').forEach(btn => {
+                                                    btn.addEventListener('click', function() {
+                                                        const itemId = this.getAttribute('data-item-id');
+                                                        if (selectedItems[itemId]) return; // Already selected
+
+                                                        const item = itemsData.find(i => i.id == itemId);
+                                                        if (!item) return;
+
+                                                        selectedItems[itemId] = item;
+
+                                                        // Build row
+                                                        const tbody = document.querySelector('#selected-items-table tbody');
+                                                        const row = document.createElement('tr');
+                                                        row.setAttribute('data-item-id', itemId);
+
+                                                        // Item name
+                                                        const tdName = document.createElement('td');
+                                                        tdName.innerHTML = `<strong>${escapeHtml(item.item_name)}</strong>` +
+                                                            (item.item_description ? `<br><small class="text-muted">${escapeHtml(item.item_description)}</small>` : '');
+                                                        row.appendChild(tdName);
+
+                                                        // Return Qty input
+                                                        const max = item.quantity - (item.returned_quantity || 0);
+                                                        const tdQty = document.createElement('td');
+                                                        tdQty.innerHTML = `<input type="number" min="1" max="${max}" class="form-control form-control-sm" 
+                                                        name="return_quantity[${itemId}]" value="${max}" readonly required>`;
+                                                        row.appendChild(tdQty);
+
+                                                        // Condition select
+                                                        const tdCond = document.createElement('td');
+                                                        tdCond.innerHTML = `<select class="form-select form-select-sm" name="return_condition[${itemId}]">
+                                                        <option value="good">Good</option>
+                                                        <option value="damaged">Damaged</option>
+                                                        <option value="lost">Lost</option>
+                                                    </select>`;
+                                                        row.appendChild(tdCond);
+
+                                                        // Remove button
+                                                        const tdRemove = document.createElement('td');
+                                                        tdRemove.innerHTML = `<button type="button" class="btn btn-danger btn-sm remove-selected-item" data-item-id="${itemId}">
+                                                        <i class="bi bi-x"></i>
+                                                    </button>`;
+                                                        row.appendChild(tdRemove);
+
+                                                        tbody.appendChild(row);
+
+                                                        document.getElementById('selected-items-table').style.display = '';
+                                                        this.disabled = true;
+                                                    });
+                                                });
+
+                                                // Remove selected item
+                                                document.addEventListener('click', function(e) {
+                                                    if (e.target.closest('.remove-selected-item')) {
+                                                        const btn = e.target.closest('.remove-selected-item');
+                                                        const itemId = btn.getAttribute('data-item-id');
+                                                        delete selectedItems[itemId];
+                                                        const row = document.querySelector(`#selected-items-table tr[data-item-id="${itemId}"]`);
+                                                        if (row) row.remove();
+                                                        // Re-enable select button
+                                                        const selectBtn = document.getElementById('select-btn-' + itemId);
+                                                        if (selectBtn) selectBtn.disabled = false;
+                                                        // Hide table if empty
+                                                        if (document.querySelectorAll('#selected-items-table tbody tr').length === 0) {
+                                                            document.getElementById('selected-items-table').style.display = 'none';
+                                                        }
+                                                    }
+                                                });
+
+                                                // Escape HTML utility
+                                                function escapeHtml(text) {
+                                                    return text.replace(/[&<>"']/g, function(m) {
+                                                        return ({
+                                                            '&': '&amp;',
+                                                            '<': '&lt;',
+                                                            '>': '&gt;',
+                                                            '"': '&quot;',
+                                                            "'": '&#39;'
+                                                        })[m];
+                                                    });
+                                                }
+                                            </script>
                                         </div>
                                     <?php endif; ?>
                                 </div>
