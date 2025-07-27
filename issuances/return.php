@@ -193,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                         <th>Item</th>
                                                         <th>Serial No</th>
                                                         <th>Issued Qty</th>
-                                                        <th>Return Qty *</th>
+                                                        <th>Action</th>
                                                         <th>Condition</th>
                                                     </tr>
                                                 </thead>
