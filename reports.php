@@ -60,10 +60,11 @@ $products = $stmt->fetchAll();
             <button id="downloadPdfBtn" class="btn btn-danger mb-3">
                 <i class="bi bi-file-earmark-pdf"></i> Download PDF
             </button>
-
-            <a href="../export_db.php" class="btn btn-success mb-3">
-                <i class="bi bi-download"></i> Export Database
-            </a>
+            <?php if ($status === 'admin'): ?>
+                <a href="./export_db.php" class="btn btn-success mb-3">
+                    <i class="bi bi-download"></i> Export Database
+                </a>
+            <?php endif; ?>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>

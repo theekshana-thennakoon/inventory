@@ -31,7 +31,7 @@ if (!$issuance) {
 
 // Get issued items
 $items = $pdo->prepare("
-    SELECT ii.*, i.name as item_name, i.description as item_description
+    SELECT ii.*, i.name as item_name, i.serial_no as item_serial_no, i.description as item_description
     FROM issuance_items ii
     JOIN items i ON ii.item_id = i.id
     WHERE ii.issuance_id = ?
@@ -72,17 +72,17 @@ $items = $items->fetchAll(PDO::FETCH_ASSOC);
                                 <i class="bi bi-arrow-left"></i> Back to Issuances
                             </a>
                             <?php
-                            if($technical_officer_status == 'admin' || $technical_officer_status == 'to'){
+                            if ($technical_officer_status == 'admin' || $technical_officer_status == 'to') {
                             ?>
-                            <?php if (allItemsReturned($items)): ?>
-                                <span class="btn btn-sm btn-success">
-                                    <i class="bi bi-check-circle"></i> All Returned
-                                </span>
-                            <?php else: ?>
-                                <a href="return.php?id=<?php echo $issuanceId; ?>" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-box-arrow-in-down"></i> Record Returns
-                                </a>
-                            <?php endif; ?>
+                                <?php if (allItemsReturned($items)): ?>
+                                    <span class="btn btn-sm btn-success">
+                                        <i class="bi bi-check-circle"></i> All Returned
+                                    </span>
+                                <?php else: ?>
+                                    <a href="return.php?id=<?php echo $issuanceId; ?>" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-box-arrow-in-down"></i> Record Returns
+                                    </a>
+                                <?php endif; ?>
                             <?php
                             }
                             ?>
@@ -144,7 +144,7 @@ $items = $items->fetchAll(PDO::FETCH_ASSOC);
                                         <thead>
                                             <tr>
                                                 <th>Item</th>
-                                                <th>Qty Issued</th>
+                                                <th>Serial No</th>
                                                 <th>Qty Returned</th>
                                                 <th>Status</th>
                                             </tr>
@@ -158,7 +158,7 @@ $items = $items->fetchAll(PDO::FETCH_ASSOC);
                                                             <br><small class="text-muted"><?php echo htmlspecialchars($item['item_description']); ?></small>
                                                         <?php endif; ?>
                                                     </td>
-                                                    <td><?php echo $item['quantity']; ?></td>
+                                                    <td><?php echo $item['item_serial_no']; ?></td>
                                                     <td><?php echo $item['returned_quantity'] ?? '0'; ?></td>
                                                     <td>
                                                         <?php if ($item['returned_quantity'] === null): ?>
