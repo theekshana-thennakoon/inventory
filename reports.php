@@ -93,6 +93,40 @@ $products = $stmt->fetchAll();
         </script>
         <div class="mb-3 d-flex justify-content-end">
             <input type="text" id="searchInput" class="form-control w-25" placeholder="Search inventory report...">
+
+            <!-- No PHP needed here, search is handled by JS below -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const searchInput = document.getElementById('searchInput');
+                    const table = document.querySelector('table');
+                    const rows = table.querySelectorAll('tbody tr');
+
+                    searchInput.addEventListener('keyup', function() {
+                        const query = this.value.toLowerCase();
+                        rows.forEach(row => {
+                            // Only search in relevant columns: Issued date, Issued by, Department, Issued to, Issued items
+                            const cells = row.querySelectorAll('td');
+                            if (cells.length < 7) {
+                                row.style.display = '';
+                                return;
+                            }
+                            const issuedDate = cells[1].textContent.toLowerCase();
+                            const issuedBy = cells[2].textContent.toLowerCase();
+                            const department = cells[4].textContent.toLowerCase();
+                            const issuedTo = cells[5].textContent.toLowerCase();
+                            const issuedItems = cells[6].textContent.toLowerCase();
+
+                            const match = issuedDate.includes(query) ||
+                                issuedBy.includes(query) ||
+                                department.includes(query) ||
+                                issuedTo.includes(query) ||
+                                issuedItems.includes(query);
+
+                            row.style.display = match ? '' : 'none';
+                        });
+                    });
+                });
+            </script>
         </div>
         <div class="inventory pt-5">
             <center>
@@ -144,7 +178,7 @@ $products = $stmt->fetchAll();
                                     <td><?= htmlspecialchars($product['department_name']) ?></td>
                                     <td><?= htmlspecialchars($product['department_member_name']) ?></td>
                                     <td><?= htmlspecialchars($product['item_name']) ?></td>
-                                    <td><?= htmlspecialchars($product['return_date']) ?></td>
+                                    <td><?= isset($product['return_date']) ? htmlspecialchars($product['return_date']) : '<center>-</center>' ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
