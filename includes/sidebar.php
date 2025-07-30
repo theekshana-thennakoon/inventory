@@ -11,7 +11,7 @@ $technical_officer_status = $_SESSION["technical_officer_status"];
             if ($technical_officer_status == 'admin' || $technical_officer_status == 'to') {
             ?>
                 <a href="../departments/" class="list-group-item list-group-item-action">
-                    <i class="bi bi-building me-2"></i> Departments
+                    <i class="bi bi-camera me-2"></i> Departments
                 </a>
             <?php
             }

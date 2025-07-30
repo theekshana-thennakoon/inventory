@@ -71,7 +71,7 @@ $recentIssuances = $pdo->query("SELECT i.id, i.issue_date, i.reason,
                                         <h3 class="mb-0"><?php echo $departmentCount; ?></h3>
                                     </div>
                                     <div class="bg-primary bg-opacity-10 p-3 rounded">
-                                        <i class="bi bi-building fs-4 text-primary"></i>
+                                        <i class="bi bi-camera fs-4 text-primary"></i>
                                     </div>
                                 </div>
                                 <a href="departments/" class="stretched-link"></a>
