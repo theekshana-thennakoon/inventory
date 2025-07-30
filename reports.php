@@ -166,7 +166,7 @@ $products = $stmt->fetchAll();
                     <tbody>
                         <?php if (count($products) === 0): ?>
                             <tr>
-                                <td colspan="5">Inventory not found</td>
+                                <td colspan="8">Inventory not found</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($products as $i => $product): ?>
